@@ -1,7 +1,7 @@
 #include <windows.h> 
 #include<stdio.h>
 #include<stdlib.h>
-#define WINWIDTH 1200
+#define WINWIDTH 400
 #define WINHEIGHT 480
 #include <time.h>
 #include<conio.h>
@@ -124,22 +124,22 @@ int RePaint(HDC hdc, HWND hWnd)
 	DeleteObject(hBrush);
 	hPen = CreatePen(PS_SOLID, 4, RGB(0, 0, 0));//画笔形状
 	SelectObject(hdc, hPen);
-	MoveToEx(hdc, 300, 0,NULL);
+	MoveToEx(hdc, 100, 0,NULL);
+	LineTo(hdc, 100, 400);
+	MoveToEx(hdc, 200, 0, NULL);
+	LineTo(hdc, 200, 400);
+	MoveToEx(hdc, 300, 0, NULL);
 	LineTo(hdc, 300, 400);
-	MoveToEx(hdc, 600, 0, NULL);
-	LineTo(hdc, 600, 400);
-	MoveToEx(hdc, 900, 0, NULL);
-	LineTo(hdc, 900, 400);
 	MoveToEx(hdc, 0, 100, NULL);
-	LineTo(hdc, 1200, 100);
+	LineTo(hdc, 400, 100);
 	MoveToEx(hdc, 0, 200, NULL);
-	LineTo(hdc, 1200, 200);
+	LineTo(hdc, 400, 200);
 	MoveToEx(hdc, 0, 300, NULL);
-	LineTo(hdc, 1200, 300);
+	LineTo(hdc, 400, 300);
 	MoveToEx(hdc, 0, 400, NULL);
-	LineTo(hdc, 1200, 400);
+	LineTo(hdc, 400, 400);
 	MoveToEx(hdc, 0, 450, NULL);
-	LineTo(hdc, 1200,450);
+	LineTo(hdc, 400,450);
 	// Clean up
 	DeleteObject(bgRgn);
 	DeleteObject(hBrush);
@@ -149,6 +149,65 @@ int RePaint(HDC hdc, HWND hWnd)
 	GetStockObject(DC_PEN);
 	return 0;
 
+}
+void COVER(HDC hdc)
+{
+	RECT smallrect;
+	HRGN bgRgn;
+	HBRUSH hBrush;
+	int i, j;
+	for (i = 0; i < 4; i++)
+	{
+		for (j = 0; j < 4; j++)
+		{
+			smallrect.left = i * 100;
+			smallrect.top = j * 100;
+			smallrect.right = (i + 1) * 100;
+			smallrect.bottom = (j + 1) * 100;
+			switch (BOX[i][j])
+			{
+			case 2:
+				hBrush = CreateSolidBrush(RGB(173, 137, 118));
+				break;
+			case 4:
+				hBrush = CreateSolidBrush(RGB(255, 150, 128));
+				break;
+			case 8:
+				hBrush = CreateSolidBrush(RGB(247, 68, 97));
+				break;
+			case 16:
+				hBrush = CreateSolidBrush(RGB(175, 18, 88));
+				break;
+			case 32:
+				hBrush = CreateSolidBrush(RGB(244, 13, 100));
+				break;
+			case 64:
+				hBrush = CreateSolidBrush(RGB(255, 66, 93));
+				break;
+			case 128:
+				hBrush = CreateSolidBrush(RGB(197, 31, 31));
+				break;
+			case 256:
+				hBrush = CreateSolidBrush(RGB(156, 38, 50));
+				break;
+			case 512:
+				hBrush = CreateSolidBrush(RGB(153, 80, 84));
+				break;
+			case 1024:
+				hBrush = CreateSolidBrush(RGB(161, 47, 47));
+				break;
+			case 2048:
+				hBrush = CreateSolidBrush(RGB(161, 23, 21));
+				break;
+			default:
+				hBrush = CreateSolidBrush(RGB(151, 173, 172));
+				break;
+			}
+			bgRgn = CreateRectRgnIndirect(&smallrect);
+			FillRgn(hdc, bgRgn, hBrush);
+			DeleteObject(hBrush);
+		}
+	}
 }
 int smallpaint(HDC hdc)
 {
@@ -161,9 +220,9 @@ int smallpaint(HDC hdc)
 		} while (BOX[a][b] != 0);
 		if (rand() % 4 == 0)BOX[a][b] = 4;
 		else BOX[a][b] = 2; 
-	smallrect.left = a * 300;
+	smallrect.left = a * 100;
 	smallrect.top = b * 100;
-	smallrect.right = (a + 1) * 300;
+	smallrect.right = (a + 1) * 100;
 	smallrect.bottom = (b + 1) * 100;
 	HRGN bgRgn;
 	HBRUSH hBrush;
@@ -178,25 +237,27 @@ int smallpaint(HDC hdc)
 	}
 	FillRgn(hdc, bgRgn, hBrush);
 	DeleteObject(hBrush);
-	hFont = CreateFont(48, 0, 0, 0, FW_DONTCARE, 0, 1, 0, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+	hFont = CreateFont(48, 0, 0, 0, FW_DONTCARE, 0, 0, 0, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
 		CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
 	if (hOldFont = (HFONT)SelectObject(hdc, hFont))
 	{
 		CHAR szSourceInfo[1024];
-		wsprintf(szSourceInfo, "%4d", BOX[a][b]);
+		wsprintf(szSourceInfo, "%d", BOX[a][b]);
 		// 设置输出颜色
 		SetTextColor(hdc, RGB(0,34,40));
 		// 输出字符串。
-		TextOut(hdc, a * 300 + 50, b * 100 + 50,
+		int nOldMode = SetBkMode(hdc, TRANSPARENT);
+		TextOut(hdc, a * 100 + 50, b * 100 + 50,
 			szSourceInfo, lstrlen(szSourceInfo));
+		SetBkMode(hdc, TRANSPARENT);
 		// 输出完成，将原来的字体对象放回DC中
 		SelectObject(hdc, hOldFont);
 	}
 
 	// 在内存DC中画完，一次输出的窗口DC上。
-	BitBlt(hdc,
+	/*BitBlt(hdc,
 		0, 0, 1200,480,
-		hdc, 0, 0, SRCCOPY);
+		hdc, 0, 0, SRCCOPY);*/
 	DeleteObject(hdc);
 	DeleteObject(hFont);
 	return 0;
@@ -215,7 +276,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	case WM_PAINT:
 	{
 		hdc = BeginPaint(hWnd, &ps);
-		hdcmem = CreateCompatibleDC(hdc);
 		RePaint(hdc, hWnd);
 		EndPaint(hWnd, &ps);
 		if (smallflag)
@@ -309,25 +369,27 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 			break;
 			
 		}
-		hdc = GetDC(hWnd);
-		textout(hdc);
-		ReleaseDC(hWnd, hdc);
+		
 		if (notfilled())
 		{
 			hdc = GetDC(hWnd);
 			smallpaint(hdc);
 			ReleaseDC(hWnd, hdc);
 		}
-		
+		hdc = GetDC(hWnd);
+		RePaint(hdc, hWnd);
+		COVER(hdc);
+		textout(hdc);
+		ReleaseDC(hWnd, hdc);
 		if (gamewin())
 		{
 			MessageBox(NULL, "WIN", "Game Over", MB_OK);
-			
+			ExitProcess(0);
 		}
 		if (gamefail())
 		{
 			MessageBox(NULL, "LOSE", "Game Over", MB_OK);
-			
+			ExitProcess(0);
 		}
 		break;
 
@@ -338,11 +400,6 @@ LRESULT CALLBACK MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
-	
-	
-	
-	
-	//int i, j = 0;
 	
 	return 0;
 }
@@ -356,26 +413,31 @@ void textout(HDC hdc)
 	{
 		for (j = 0; j < 4; j++)
 		{
-			hFont = CreateFont(48, 0, 0, 0, FW_DONTCARE, 0, 1, 0, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-				CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
-			if (hOldFont = (HFONT)SelectObject(hdc, hFont))
+			if (BOX[i][j] != 0)
 			{
-				CHAR szSourceInfo[1024];
-				wsprintf(szSourceInfo, "%4d", BOX[i][j]);
-				// 设置输出颜色
-				SetTextColor(hdc, RGB(0, 34, 40));
-				// 输出字符串。
-				TextOut(hdc, i * 300 + 50, j * 100 + 50,
-					szSourceInfo, lstrlen(szSourceInfo));
-				// 输出完成，将原来的字体对象放回DC中
-				SelectObject(hdc, hOldFont);
-			}
+				hFont = CreateFont(48, 0, 0, 0, FW_DONTCARE, 0, 0, 0, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+					CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, TEXT("Consolas"));
+				if (hOldFont = (HFONT)SelectObject(hdc, hFont))
+				{
+					CHAR szSourceInfo[1024];
+					wsprintf(szSourceInfo, "%d", BOX[i][j]);
+					// 设置输出颜色
+					SetTextColor(hdc, RGB(0, 34, 40));
+					// 输出字符串。
+					int nOldMode = SetBkMode(hdc, TRANSPARENT);
+					TextOut(hdc, i * 100 + 50, j * 100 + 50,
+						szSourceInfo, lstrlen(szSourceInfo));
+					SetBkMode(hdc, TRANSPARENT);
+					// 输出完成，将原来的字体对象放回DC中
+					SelectObject(hdc, hOldFont);
+				}
 
-			// 在内存DC中画完，一次输出的窗口DC上。
-			BitBlt(hdc,
-				0, 0, 1200, 480,
-				hdc, 0, 0, SRCCOPY);
-			DeleteObject(hFont);
+				// 在内存DC中画完，一次输出的窗口DC上。
+				/*BitBlt(hdc,
+					0, 0, 1200, 480,
+					hdc, 0, 0, SRCCOPY);*/
+				DeleteObject(hFont);
+			}
 		}
 	}
 }

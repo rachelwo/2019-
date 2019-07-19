@@ -25,8 +25,6 @@ int BOX[4][4] = {
 		0,0,0,0,
 		0,0,0,0
 };
-int score = 0;
-int step = 0;
 int *add(int item[])
 {
 	int i, j = 0;
@@ -45,11 +43,10 @@ int *add(int item[])
 		{
 			tep[i] *= 2;
 			tep[i + 1] = 0;
-			score += tep[i];
 		}
 	}
-	j = 0;
-	for (i = 0; i < 4; i++)
+	
+	for (i = 0, j = 0; i < 4; i++)
 	{
 		if (tep[i] != 0)
 		{
@@ -242,7 +239,7 @@ int gamefail()
 {
 	int flag = 0;
 	int i, j = 0;
-	if (ifup() + ifdown() + ifleft() + ifright() == 0||!notfilled)
+	if (ifup() + ifdown() + ifleft() + ifright() == 0||!notfilled())
 	{
 		flag = 1;
 	}
